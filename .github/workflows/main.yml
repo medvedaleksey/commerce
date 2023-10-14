@@ -1,0 +1,43 @@
+name: E2E on Edge
+
+on: [push]
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set node version
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: '.nvmrc'
+      - name: Set pnpm version
+        uses: pnpm/action-setup@v2
+        with:
+          run_install: false
+          version: 7
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v3
+        with:
+          path: '**/node_modules'
+          key: node-modules-cache-${{ hashFiles('**/pnpm-lock.yaml') }}
+
+      - name: Install dependencies
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: pnpm install
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          project: ..
+          browser: edge
+          build: pnpm build
+          start: pnpm dev
+          wait-on: 'http://localhost:3000'
+          config-file: cypress.config.js
+        env:
+          COMMERCE_PROVIDER: ${{ secrets.COMMERCE_PROVIDER }}
+          SHOPIFY_STOREFRONT_ACCESS_TOKEN: ${{ secrets.SHOPIFY_STOREFRONT_ACCESS_TOKEN }}
+          SHOPIFY_STORE_DOMAIN: ${{ secrets.SHOPIFY_STORE_DOMAIN }}

@@ -80,7 +80,7 @@ export default function CartModal({ cart }: { cart: Cart | undefined }) {
                 </div>
               ) : (
                 <div className="flex h-full flex-col justify-between overflow-hidden p-1">
-                  <ul className="flex-grow overflow-auto py-4">
+                  <ul className="flex-grow overflow-auto py-4" data-test="cart-list">
                     {cart.lines.map((item, i) => {
                       const merchandiseSearchParams = {} as MerchandiseSearchParams;
 
